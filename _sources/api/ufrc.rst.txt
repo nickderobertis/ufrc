@@ -1,0 +1,34 @@
+ufrc package
+============
+
+.. automodule:: ufrc
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+
+   ufrc.ssh
+
+Submodules
+----------
+
+ufrc.exc module
+---------------
+
+.. automodule:: ufrc.exc
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ufrc.main module
+----------------
+
+.. automodule:: ufrc.main
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

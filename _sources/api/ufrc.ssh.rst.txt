@@ -1,0 +1,27 @@
+ufrc.ssh package
+================
+
+.. automodule:: ufrc.ssh
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+ufrc.ssh.client module
+----------------------
+
+.. automodule:: ufrc.ssh.client
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ufrc.ssh.response module
+------------------------
+
+.. automodule:: ufrc.ssh.response
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
