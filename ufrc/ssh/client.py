@@ -10,6 +10,7 @@ class SSHClient(paramiko.SSHClient):
             print("'" + prompt + "'", prompt.startswith("Duo two-factor login"))
             if prompt.startswith("password"):
                 answers.append(self.password)
+            # TODO: Add ability to pass option 2 for a phone call
             elif prompt.startswith("duo two-factor login"):
                 answers.append("1")
             else:
