@@ -24,3 +24,4 @@ cruft = "*"
 paramiko = "*"
 pydantic = {extras = ["dotenv"], version = "*"}
 types-paramiko = "*"
+scp = "*"
