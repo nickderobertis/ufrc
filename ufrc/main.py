@@ -1,4 +1,8 @@
-from typing import Final, Optional
+import os
+from typing import Final, Optional, Sequence, Union
+
+import scp
+from scp import SCPClient
 
 from ufrc.exc import NoUFRCConnectionException
 from ufrc.ssh.client import SSHClient
@@ -12,17 +16,21 @@ class UFRC:
         self.server = server
 
         self._ssh_client: Optional[SSHClient] = None
+        self._scp_client: Optional[SCPClient] = None
 
     def connect(self, username: str, password: str):
         ssh = SSHClient()
         ssh.load_system_host_keys()
         ssh.connect(self.server, username=username, password=password)
         self._ssh_client = ssh
+        self._scp_client = SCPClient(ssh.get_transport())
 
     def disconnect(self):
         self._ssh_client.close()
         del self._ssh_client
+        del self._scp_client
         self._ssh_client = None
+        self._scp_client = None
 
     @property
     def is_connected(self) -> bool:
@@ -38,6 +46,38 @@ class UFRC:
         return SSHResponse(
             stdout=ssh_stdout.read().decode(),
             stderr=ssh_stderr.read().decode(),
+        )
+
+    def put(
+        self,
+        files: Union[os.PathLike, Sequence[os.PathLike]],
+        to_path: str = ".",
+        recursive=False,
+        preserve_times=False,
+    ):
+        if self._scp_client is None:
+            raise NoUFRCConnectionException(
+                "Use .connect(username, password) before .put"
+            )
+
+        self._scp_client.put(
+            files, to_path, recursive=recursive, preserve_times=preserve_times
+        )
+
+    def get(
+        self,
+        remote_path: str,
+        local_path: str = "",
+        recursive=False,
+        preserve_times=False,
+    ):
+        if self._scp_client is None:
+            raise NoUFRCConnectionException(
+                "Use .connect(username, password) before .get"
+            )
+
+        self._scp_client.get(
+            remote_path, local_path, recursive=recursive, preserve_times=preserve_times
         )
 
     # TODO: run python code directly
