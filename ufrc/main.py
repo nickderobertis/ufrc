@@ -1,10 +1,13 @@
 import os
+import tempfile
+from pathlib import Path
 from typing import Final, Optional, Sequence, Union
 
 import scp
 from scp import SCPClient
 
 from ufrc.exc import NoUFRCConnectionException
+from ufrc.sbatch import SBatchFile
 from ufrc.ssh.client import SSHClient
 from ufrc.ssh.response import SSHResponse
 
@@ -63,6 +66,14 @@ class UFRC:
         self._scp_client.put(
             files, to_path, recursive=recursive, preserve_times=preserve_times
         )
+
+    def put_sbatch(
+        self, sbatch: SBatchFile, file_name: str = "my_job.sbatch", to_path: str = "."
+    ):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            out_path = Path(temp_dir) / file_name
+            out_path.write_text(sbatch.contents)
+            self.put(str(out_path), to_path=to_path)
 
     def get(
         self,
