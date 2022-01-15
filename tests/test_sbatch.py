@@ -25,6 +25,12 @@ def test_sbatch_headers():
     assert output == EXPECT_SBATCH_HEADERS
 
 
+def test_sbatch_headers_with_array():
+    sbatch = SBatchHeaders(job_name="my_job", email="derobertisna@ufl.edu", array="1-5")
+    output = sbatch.header_str
+    assert output == EXPECT_SBATCH_HEADERS + "\n#SBATCH --array=1-5"
+
+
 def test_sbatch_file():
     headers = SBatchHeaders(job_name="my_job", email="derobertisna@ufl.edu")
     sbatch = SBatchFile(commands=["module load python", "ls -l"], headers=headers)

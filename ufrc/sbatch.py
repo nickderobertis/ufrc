@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Union
+from typing import List, Union, Optional
 
 from pydantic import BaseModel, Field
 
@@ -23,6 +23,7 @@ class SBatchHeaders(BaseModel):
     )
     output: str = "%j.log"
     time: str = "14-0:00"
+    array: Optional[str] = None
 
     @property
     def header_str(self) -> str:
@@ -36,6 +37,8 @@ class SBatchHeaders(BaseModel):
             _sbatch_line("time", self.time),
             _sbatch_line("output", self.output),
         ]
+        if self.array is not None:
+            headers.append(_sbatch_line("array", self.array))
         return "\n".join(headers)
 
 
