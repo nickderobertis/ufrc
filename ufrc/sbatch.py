@@ -15,7 +15,7 @@ class MailType(str, Enum):
 class SBatchHeaders(BaseModel):
     job_name: str
     email: str
-    memory_gb: float = 1.0
+    memory_mb: int = 1000
     n_tasks: int = 1
     cpus_per_task: int = 1
     mail_types: List[MailType] = Field(
@@ -30,7 +30,7 @@ class SBatchHeaders(BaseModel):
         headers = [
             _sbatch_line("job-name", self.job_name),
             _sbatch_line("mail-user", self.email),
-            _sbatch_line("mem", f"{self.memory_gb}gb"),
+            _sbatch_line("mem", f"{self.memory_mb}mb"),
             _sbatch_line("ntasks", self.n_tasks),
             _sbatch_line("cpus-per-task", self.cpus_per_task),
             _sbatch_line("mail-type", self.mail_types),

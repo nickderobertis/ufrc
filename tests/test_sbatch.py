@@ -3,7 +3,7 @@ from ufrc.sbatch import SBatchHeaders, SBatchFile
 EXPECT_SBATCH_HEADERS = """
 #SBATCH --job-name=my_job
 #SBATCH --mail-user=derobertisna@ufl.edu
-#SBATCH --mem=1.0gb
+#SBATCH --mem=1000mb
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 #SBATCH --mail-type=END,FAIL
