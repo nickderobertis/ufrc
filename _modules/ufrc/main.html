@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ufrc.main &mdash; ufrc 0.2.1 documentation</title>
+  <title>ufrc.main &mdash; ufrc 0.2.2 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                0.2.1
+                0.2.2
               </div>
             
           
@@ -168,10 +168,12 @@
             
   <h1>Source code for ufrc.main</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">tempfile</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Final</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Final</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span>
 
+<span class="kn">import</span> <span class="nn">paramiko</span>
 <span class="kn">import</span> <span class="nn">scp</span>
 <span class="kn">from</span> <span class="nn">scp</span> <span class="kn">import</span> <span class="n">SCPClient</span>
 
@@ -193,7 +195,11 @@
 <div class="viewcode-block" id="UFRC.connect"><a class="viewcode-back" href="../../api/ufrc.html#ufrc.main.UFRC.connect">[docs]</a>    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">password</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">ssh</span> <span class="o">=</span> <span class="n">SSHClient</span><span class="p">()</span>
         <span class="n">ssh</span><span class="o">.</span><span class="n">load_system_host_keys</span><span class="p">()</span>
+        <span class="n">ssh</span><span class="o">.</span><span class="n">set_missing_host_key_policy</span><span class="p">(</span><span class="n">paramiko</span><span class="o">.</span><span class="n">AutoAddPolicy</span><span class="p">())</span>
         <span class="n">ssh</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="n">password</span><span class="p">)</span>
+        <span class="n">channel</span> <span class="o">=</span> <span class="n">ssh</span><span class="o">.</span><span class="n">invoke_shell</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stdin</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="n">makefile</span><span class="p">(</span><span class="s2">&quot;wb&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stdout</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="n">makefile</span><span class="p">(</span><span class="s2">&quot;r&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ssh_client</span> <span class="o">=</span> <span class="n">ssh</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_scp_client</span> <span class="o">=</span> <span class="n">SCPClient</span><span class="p">(</span><span class="n">ssh</span><span class="o">.</span><span class="n">get_transport</span><span class="p">())</span></div>
 
@@ -208,17 +214,60 @@
     <span class="k">def</span> <span class="nf">is_connected</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ssh_client</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
+    <span class="k">def</span> <span class="nf">_execute_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SSHResponse</span><span class="p">:</span>
+        <span class="c1"># Adapted from https://stackoverflow.com/a/36948840/6276321</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">cmd</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">finish</span> <span class="o">=</span> <span class="s2">&quot;end of stdOUT buffer. finished with exit status&quot;</span>
+        <span class="n">echo_cmd</span> <span class="o">=</span> <span class="s2">&quot;echo </span><span class="si">{}</span><span class="s2"> $?&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">finish</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">echo_cmd</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">shin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stdin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stdin</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+        <span class="n">shout</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">sherr</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">exit_status</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stdout</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">echo_cmd</span><span class="p">):</span>
+                <span class="c1"># up for now filled with shell junk from stdin</span>
+                <span class="n">shout</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">elif</span> <span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">finish</span><span class="p">):</span>
+                <span class="c1"># our finish command ends with the exit status</span>
+                <span class="n">exit_status</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">)</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">exit_status</span><span class="p">:</span>
+                    <span class="c1"># stderr is combined with stdout.</span>
+                    <span class="c1"># thus, swap sherr with shout in a case of failure.</span>
+                    <span class="n">sherr</span> <span class="o">=</span> <span class="n">shout</span>
+                    <span class="n">shout</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># get rid of &#39;coloring and formatting&#39; special characters</span>
+                <span class="n">shout</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(\x9B|\x1B\[)[0-?]*[ -/]*[@-~]&quot;</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\b</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+
+        <span class="c1"># first and last lines of shout/sherr contain a prompt</span>
+        <span class="k">if</span> <span class="n">shout</span> <span class="ow">and</span> <span class="n">echo_cmd</span> <span class="ow">in</span> <span class="n">shout</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">shout</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">shout</span> <span class="ow">and</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="n">shout</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">shout</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sherr</span> <span class="ow">and</span> <span class="n">echo_cmd</span> <span class="ow">in</span> <span class="n">sherr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">sherr</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">sherr</span> <span class="ow">and</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="n">sherr</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">sherr</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">SSHResponse</span><span class="p">(</span><span class="n">stdout</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">shout</span><span class="p">),</span> <span class="n">stderr</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sherr</span><span class="p">))</span>
+
 <div class="viewcode-block" id="UFRC.run"><a class="viewcode-back" href="../../api/ufrc.html#ufrc.main.UFRC.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SSHResponse</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ssh_client</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">NoUFRCConnectionException</span><span class="p">(</span>
                 <span class="s2">&quot;Use .connect(username, password) before .run&quot;</span>
             <span class="p">)</span>
 
-        <span class="n">_</span><span class="p">,</span> <span class="n">ssh_stdout</span><span class="p">,</span> <span class="n">ssh_stderr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ssh_client</span><span class="o">.</span><span class="n">exec_command</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">SSHResponse</span><span class="p">(</span>
-            <span class="n">stdout</span><span class="o">=</span><span class="n">ssh_stdout</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(),</span>
-            <span class="n">stderr</span><span class="o">=</span><span class="n">ssh_stderr</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(),</span>
-        <span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_execute_command</span><span class="p">(</span><span class="n">command</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="UFRC.put"><a class="viewcode-back" href="../../api/ufrc.html#ufrc.main.UFRC.put">[docs]</a>    <span class="k">def</span> <span class="nf">put</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
