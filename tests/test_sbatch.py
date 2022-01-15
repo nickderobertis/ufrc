@@ -1,4 +1,4 @@
-from ufrc.sbatch import SBatchHeaders
+from ufrc.sbatch import SBatchHeaders, SBatchFile
 
 EXPECT_SBATCH_HEADERS = """
 #SBATCH --job-name=my_job
@@ -11,7 +11,22 @@ EXPECT_SBATCH_HEADERS = """
 #SBATCH --output=%j.log
 """.strip()
 
+EXPECT_SBATCH_FILE = f"""
+#!/bin/bash
+{EXPECT_SBATCH_HEADERS}
+module load python
+ls -l
+""".strip()
+
+
 def test_sbatch_headers():
     sbatch = SBatchHeaders(job_name="my_job", email="derobertisna@ufl.edu")
     output = sbatch.header_str
     assert output == EXPECT_SBATCH_HEADERS
+
+
+def test_sbatch_file():
+    headers = SBatchHeaders(job_name="my_job", email="derobertisna@ufl.edu")
+    sbatch = SBatchFile(commands=["module load python", "ls -l"], headers=headers)
+    output = sbatch.contents
+    assert output == EXPECT_SBATCH_FILE
