@@ -32,3 +32,11 @@ ufrc.main module
    :undoc-members:
    :show-inheritance:
 
+ufrc.sbatch module
+------------------
+
+.. automodule:: ufrc.sbatch
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

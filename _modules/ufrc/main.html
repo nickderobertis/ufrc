@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ufrc.main &mdash; ufrc 0.1.2 documentation</title>
+  <title>ufrc.main &mdash; ufrc 0.2.0 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                0.1.2
+                0.2.0
               </div>
             
           
@@ -167,9 +167,16 @@
            <div itemprop="articleBody">
             
   <h1>Source code for ufrc.main</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Final</span><span class="p">,</span> <span class="n">Optional</span>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Final</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">scp</span>
+<span class="kn">from</span> <span class="nn">scp</span> <span class="kn">import</span> <span class="n">SCPClient</span>
 
 <span class="kn">from</span> <span class="nn">ufrc.exc</span> <span class="kn">import</span> <span class="n">NoUFRCConnectionException</span>
+<span class="kn">from</span> <span class="nn">ufrc.sbatch</span> <span class="kn">import</span> <span class="n">SBatchFile</span>
 <span class="kn">from</span> <span class="nn">ufrc.ssh.client</span> <span class="kn">import</span> <span class="n">SSHClient</span>
 <span class="kn">from</span> <span class="nn">ufrc.ssh.response</span> <span class="kn">import</span> <span class="n">SSHResponse</span>
 
@@ -180,18 +187,22 @@
 <div class="viewcode-block" id="UFRC.__init__"><a class="viewcode-back" href="../../api/ufrc.html#ufrc.main.UFRC.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">SERVER</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">server</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ssh_client</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SSHClient</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ssh_client</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SSHClient</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scp_client</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SCPClient</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 <div class="viewcode-block" id="UFRC.connect"><a class="viewcode-back" href="../../api/ufrc.html#ufrc.main.UFRC.connect">[docs]</a>    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">password</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">ssh</span> <span class="o">=</span> <span class="n">SSHClient</span><span class="p">()</span>
         <span class="n">ssh</span><span class="o">.</span><span class="n">load_system_host_keys</span><span class="p">()</span>
         <span class="n">ssh</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="n">password</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ssh_client</span> <span class="o">=</span> <span class="n">ssh</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ssh_client</span> <span class="o">=</span> <span class="n">ssh</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scp_client</span> <span class="o">=</span> <span class="n">SCPClient</span><span class="p">(</span><span class="n">ssh</span><span class="o">.</span><span class="n">get_transport</span><span class="p">())</span></div>
 
 <div class="viewcode-block" id="UFRC.disconnect"><a class="viewcode-back" href="../../api/ufrc.html#ufrc.main.UFRC.disconnect">[docs]</a>    <span class="k">def</span> <span class="nf">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ssh_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ssh_client</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ssh_client</span> <span class="o">=</span> <span class="kc">None</span></div>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scp_client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ssh_client</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scp_client</span> <span class="o">=</span> <span class="kc">None</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">is_connected</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -207,6 +218,46 @@
         <span class="k">return</span> <span class="n">SSHResponse</span><span class="p">(</span>
             <span class="n">stdout</span><span class="o">=</span><span class="n">ssh_stdout</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(),</span>
             <span class="n">stderr</span><span class="o">=</span><span class="n">ssh_stderr</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(),</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="UFRC.put"><a class="viewcode-back" href="../../api/ufrc.html#ufrc.main.UFRC.put">[docs]</a>    <span class="k">def</span> <span class="nf">put</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">files</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+        <span class="n">to_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+        <span class="n">recursive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">preserve_times</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scp_client</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NoUFRCConnectionException</span><span class="p">(</span>
+                <span class="s2">&quot;Use .connect(username, password) before .put&quot;</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scp_client</span><span class="o">.</span><span class="n">put</span><span class="p">(</span>
+            <span class="n">files</span><span class="p">,</span> <span class="n">to_path</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="n">recursive</span><span class="p">,</span> <span class="n">preserve_times</span><span class="o">=</span><span class="n">preserve_times</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="UFRC.put_sbatch"><a class="viewcode-back" href="../../api/ufrc.html#ufrc.main.UFRC.put_sbatch">[docs]</a>    <span class="k">def</span> <span class="nf">put_sbatch</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">sbatch</span><span class="p">:</span> <span class="n">SBatchFile</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;my_job.sbatch&quot;</span><span class="p">,</span> <span class="n">to_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span>
+    <span class="p">):</span>
+        <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">temp_dir</span><span class="p">:</span>
+            <span class="n">out_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">temp_dir</span><span class="p">)</span> <span class="o">/</span> <span class="n">file_name</span>
+            <span class="n">out_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">sbatch</span><span class="o">.</span><span class="n">contents</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">out_path</span><span class="p">),</span> <span class="n">to_path</span><span class="o">=</span><span class="n">to_path</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="UFRC.get"><a class="viewcode-back" href="../../api/ufrc.html#ufrc.main.UFRC.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">remote_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">local_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">recursive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">preserve_times</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scp_client</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NoUFRCConnectionException</span><span class="p">(</span>
+                <span class="s2">&quot;Use .connect(username, password) before .get&quot;</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scp_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="n">remote_path</span><span class="p">,</span> <span class="n">local_path</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="n">recursive</span><span class="p">,</span> <span class="n">preserve_times</span><span class="o">=</span><span class="n">preserve_times</span>
         <span class="p">)</span></div></div>
 
     <span class="c1"># TODO: run python code directly</span>
