@@ -1,2 +1,3 @@
-paramiko
 ufrc
+scp
+paramiko
