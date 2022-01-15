@@ -33,7 +33,7 @@ class SBatchHeaders(BaseModel):
             _sbatch_line("mem", f"{self.memory_mb}mb"),
             _sbatch_line("ntasks", self.n_tasks),
             _sbatch_line("cpus-per-task", self.cpus_per_task),
-            _sbatch_line("mail-type", self.mail_types),
+            _sbatch_line("mail-type", self.mail_types),  # type: ignore
             _sbatch_line("time", self.time),
             _sbatch_line("output", self.output),
         ]
@@ -42,15 +42,23 @@ class SBatchHeaders(BaseModel):
         return "\n".join(headers)
 
 
-def _sbatch_line(flag_name: str, value: Union[str, int, float, List[str]]) -> str:
+SBatchPrimitive = Union[str, int, MailType]
+SBatchValue = Union[SBatchPrimitive, List[SBatchPrimitive]]
+
+
+def _sbatch_line(flag_name: str, value: SBatchValue) -> str:
     return f"#SBATCH --{flag_name}={_to_sbatch_value_str(value)}"
 
 
-def _to_sbatch_value_str(value: Union[str, int, float, List[str]]) -> str:
+def _to_sbatch_value_str(value: SBatchValue) -> str:
     if isinstance(value, list):
-        if isinstance(value[0], Enum):
-            return ",".join(str(v.value) for v in value)
-        return ",".join(str(v) for v in value)
+        return ",".join(_sbatch_primitive_to_str(v) for v in value)
+    return _sbatch_primitive_to_str(value)
+
+
+def _sbatch_primitive_to_str(value: SBatchPrimitive) -> str:
+    if isinstance(value, Enum):
+        return str(value.value)
     return str(value)
 
 

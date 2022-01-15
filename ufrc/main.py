@@ -53,7 +53,7 @@ class UFRC:
 
     def put(
         self,
-        files: Union[os.PathLike, Sequence[os.PathLike]],
+        files: Union[str, Sequence[str]],
         to_path: str = ".",
         recursive=False,
         preserve_times=False,
