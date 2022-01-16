@@ -1,6 +1,7 @@
 import os
 import re
 import tempfile
+from copy import deepcopy
 from pathlib import Path
 from typing import Final, Optional, Sequence, Union, List
 
@@ -10,6 +11,7 @@ from scp import SCPClient
 
 from ufrc.exc import NoUFRCConnectionException
 from ufrc.sbatch import SBatchFile
+from ufrc.squeue.model import SQueueResponse, Job
 from ufrc.ssh.client import SSHClient
 from ufrc.ssh.response import SSHResponse
 
@@ -139,5 +141,18 @@ class UFRC:
         self._scp_client.get(
             remote_path, local_path, recursive=recursive, preserve_times=preserve_times
         )
+
+    def job_status(self, group_name: Optional[str] = None) -> SQueueResponse:
+        ssh_response = self.run("squeue --json")
+        json_idx = ssh_response.stdout.find("{")
+        json_input = ssh_response.stdout[json_idx:] + "}"
+        squeue_response = SQueueResponse.parse_raw(json_input)
+        if not group_name:
+            return squeue_response
+        new_jobs: List[Job] = []
+        for job in squeue_response.jobs:
+            if job.account == group_name or job.qos == group_name:
+                new_jobs.append(job)
+        return squeue_response.copy(update=dict(jobs=new_jobs))
 
     # TODO: run python code directly
