@@ -6,6 +6,7 @@ from pydantic import BaseSettings
 class Settings(BaseSettings):
     username: str
     password: str
+    uid: int
 
     class Config:
         env_file = ".env"

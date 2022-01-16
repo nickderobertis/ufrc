@@ -142,7 +142,12 @@ class UFRC:
             remote_path, local_path, recursive=recursive, preserve_times=preserve_times
         )
 
-    def job_status(self, group_name: Optional[str] = None) -> SQueueResponse:
+    def job_status(
+        self,
+        group_name: Optional[str] = None,
+        user_id: Optional[int] = None,
+        job_name: Optional[str] = None,
+    ) -> SQueueResponse:
         ssh_response = self.run("squeue --json")
         json_idx = ssh_response.stdout.find("{")
         json_input = ssh_response.stdout[json_idx:] + "}"
@@ -151,7 +156,14 @@ class UFRC:
             return squeue_response
         new_jobs: List[Job] = []
         for job in squeue_response.jobs:
-            if job.account == group_name or job.qos == group_name:
+            include_job = True
+            if group_name and job.account != group_name and job.qos != group_name:
+                include_job = False
+            if include_job and user_id and job.user_id != user_id:
+                include_job = False
+            if include_job and job_name and job.name != job_name:
+                include_job = False
+            if include_job:
                 new_jobs.append(job)
         return squeue_response.copy(update=dict(jobs=new_jobs))
 
