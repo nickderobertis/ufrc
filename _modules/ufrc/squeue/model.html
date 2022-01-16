@@ -1,0 +1,360 @@
+
+
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ufrc.squeue.model &mdash; ufrc 0.2.3 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/sphinx_paramlinks.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/sg_gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/sg_gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/sg_gallery-dataframe.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/sg_gallery-rendered-html.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> ufrc
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Getting started with ufrc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../auto_examples/index.html">This is my gallery</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">ufrc</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ufrc</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>ufrc.squeue.model</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for ufrc.squeue.model</h1><div class="highlight"><pre>
+<span></span><span class="c1"># generated by datamodel-codegen:</span>
+<span class="c1">#   filename:  squeue-output-small.json</span>
+<span class="c1">#   timestamp: 2022-01-16T00:43:22+00:00</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span>
+
+
+<div class="viewcode-block" id="Plugin"><a class="viewcode-back" href="../../../api/ufrc.squeue.html#ufrc.squeue.model.Plugin">[docs]</a><span class="k">class</span> <span class="nc">Plugin</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span></div>
+
+
+<div class="viewcode-block" id="Version"><a class="viewcode-back" href="../../../api/ufrc.squeue.html#ufrc.squeue.model.Version">[docs]</a><span class="k">class</span> <span class="nc">Version</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">major</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">micro</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">minor</span><span class="p">:</span> <span class="nb">int</span></div>
+
+
+<div class="viewcode-block" id="Slurm"><a class="viewcode-back" href="../../../api/ufrc.squeue.html#ufrc.squeue.model.Slurm">[docs]</a><span class="k">class</span> <span class="nc">Slurm</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">version</span><span class="p">:</span> <span class="n">Version</span>
+    <span class="n">release</span><span class="p">:</span> <span class="nb">str</span></div>
+
+
+<div class="viewcode-block" id="Meta"><a class="viewcode-back" href="../../../api/ufrc.squeue.html#ufrc.squeue.model.Meta">[docs]</a><span class="k">class</span> <span class="nc">Meta</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">plugin</span><span class="p">:</span> <span class="n">Plugin</span>
+    <span class="n">Slurm</span><span class="p">:</span> <span class="n">Slurm</span></div>
+
+
+<div class="viewcode-block" id="Job"><a class="viewcode-back" href="../../../api/ufrc.squeue.html#ufrc.squeue.model.Job">[docs]</a><span class="k">class</span> <span class="nc">Job</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">account</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">accrue_time</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">admin_comment</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">array_job_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">array_task_id</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="n">array_max_tasks</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">array_task_string</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">association_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">batch_features</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">batch_flag</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">batch_host</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">burst_buffer</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">burst_buffer_state</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">cluster</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">cluster_features</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">command</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">contiguous</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">core_spec</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="n">thread_spec</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="n">cores_per_socket</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="n">billable_tres</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="n">cpus_per_task</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="n">cpu_frequency_minimum</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="n">cpu_frequency_maximum</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="n">cpu_frequency_governor</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="n">cpus_per_tres</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">deadline</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">delay_boot</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">dependency</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">derived_exit_code</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">eligible_time</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">end_time</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">excluded_nodes</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">exit_code</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">features</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">federation_origin</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">federation_siblings_active</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">federation_siblings_viable</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">gres_detail</span><span class="p">:</span> <span class="n">List</span>
+    <span class="n">group_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">job_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">job_resources</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+    <span class="n">job_state</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">last_sched_evaluation</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">licenses</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">max_cpus</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">max_nodes</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">mcs_label</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">memory_per_tres</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">nodes</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">nice</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="n">tasks_per_core</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="n">tasks_per_node</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">tasks_per_socket</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="n">tasks_per_board</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">cpus</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">node_count</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">tasks</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">het_job_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">het_job_id_set</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">het_job_offset</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">partition</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">memory_per_node</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+    <span class="n">memory_per_cpu</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="n">minimum_cpus_per_node</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">minimum_tmp_disk_per_node</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">preempt_time</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">pre_sus_time</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">priority</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">profile</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="n">qos</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">reboot</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">required_nodes</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">requeue</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">resize_time</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">restart_cnt</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">resv_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">shared</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="n">show_flags</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">sockets_per_board</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">sockets_per_node</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="n">start_time</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">state_description</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">state_reason</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">standard_error</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">standard_input</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">standard_output</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">submit_time</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">suspend_time</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">system_comment</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">time_limit</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">time_minimum</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">threads_per_core</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="n">tres_bind</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">tres_freq</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">tres_per_job</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">tres_per_node</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">tres_per_socket</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">tres_per_task</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">tres_req_str</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">tres_alloc_str</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">user_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">wckey</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">current_working_directory</span><span class="p">:</span> <span class="nb">str</span></div>
+
+
+<div class="viewcode-block" id="SQueueResponse"><a class="viewcode-back" href="../../../api/ufrc.squeue.html#ufrc.squeue.model.SQueueResponse">[docs]</a><span class="k">class</span> <span class="nc">SQueueResponse</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">meta</span><span class="p">:</span> <span class="n">Meta</span>
+    <span class="n">errors</span><span class="p">:</span> <span class="n">List</span>
+    <span class="n">jobs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Job</span><span class="p">]</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2022, Nick DeRobertis
+
+    </p>
+  </div>
+    
+    
+      Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

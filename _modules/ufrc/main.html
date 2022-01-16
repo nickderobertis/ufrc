@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ufrc.main &mdash; ufrc 0.2.2 documentation</title>
+  <title>ufrc.main &mdash; ufrc 0.2.3 documentation</title>
   
 
   
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                0.2.2
+                0.2.3
               </div>
             
           
@@ -170,6 +170,7 @@
 <span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Final</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span>
 
@@ -179,6 +180,7 @@
 
 <span class="kn">from</span> <span class="nn">ufrc.exc</span> <span class="kn">import</span> <span class="n">NoUFRCConnectionException</span>
 <span class="kn">from</span> <span class="nn">ufrc.sbatch</span> <span class="kn">import</span> <span class="n">SBatchFile</span>
+<span class="kn">from</span> <span class="nn">ufrc.squeue.model</span> <span class="kn">import</span> <span class="n">SQueueResponse</span><span class="p">,</span> <span class="n">Job</span>
 <span class="kn">from</span> <span class="nn">ufrc.ssh.client</span> <span class="kn">import</span> <span class="n">SSHClient</span>
 <span class="kn">from</span> <span class="nn">ufrc.ssh.response</span> <span class="kn">import</span> <span class="n">SSHResponse</span>
 
@@ -307,7 +309,54 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_scp_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
             <span class="n">remote_path</span><span class="p">,</span> <span class="n">local_path</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="n">recursive</span><span class="p">,</span> <span class="n">preserve_times</span><span class="o">=</span><span class="n">preserve_times</span>
-        <span class="p">)</span></div></div>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="UFRC.job_status"><a class="viewcode-back" href="../../api/ufrc.html#ufrc.main.UFRC.job_status">[docs]</a>    <span class="k">def</span> <span class="nf">job_status</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">group_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">user_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">job_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SQueueResponse</span><span class="p">:</span>
+        <span class="n">ssh_response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;squeue --json&quot;</span><span class="p">)</span>
+        <span class="n">json_idx</span> <span class="o">=</span> <span class="n">ssh_response</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;{&quot;</span><span class="p">)</span>
+        <span class="n">json_input</span> <span class="o">=</span> <span class="n">ssh_response</span><span class="o">.</span><span class="n">stdout</span><span class="p">[</span><span class="n">json_idx</span><span class="p">:]</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span>
+        <span class="n">squeue_response</span> <span class="o">=</span> <span class="n">SQueueResponse</span><span class="o">.</span><span class="n">parse_raw</span><span class="p">(</span><span class="n">json_input</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">group_name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">squeue_response</span>
+        <span class="n">new_jobs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Job</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">job</span> <span class="ow">in</span> <span class="n">squeue_response</span><span class="o">.</span><span class="n">jobs</span><span class="p">:</span>
+            <span class="n">include_job</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">group_name</span> <span class="ow">and</span> <span class="n">job</span><span class="o">.</span><span class="n">account</span> <span class="o">!=</span> <span class="n">group_name</span> <span class="ow">and</span> <span class="n">job</span><span class="o">.</span><span class="n">qos</span> <span class="o">!=</span> <span class="n">group_name</span><span class="p">:</span>
+                <span class="n">include_job</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">include_job</span> <span class="ow">and</span> <span class="n">user_id</span> <span class="ow">and</span> <span class="n">job</span><span class="o">.</span><span class="n">user_id</span> <span class="o">!=</span> <span class="n">user_id</span><span class="p">:</span>
+                <span class="n">include_job</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">include_job</span> <span class="ow">and</span> <span class="n">job_name</span> <span class="ow">and</span> <span class="n">job</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="n">job_name</span><span class="p">:</span>
+                <span class="n">include_job</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">include_job</span><span class="p">:</span>
+                <span class="n">new_jobs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">job</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">squeue_response</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">jobs</span><span class="o">=</span><span class="n">new_jobs</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="UFRC.cancel_job_by_id"><a class="viewcode-back" href="../../api/ufrc.html#ufrc.main.UFRC.cancel_job_by_id">[docs]</a>    <span class="k">def</span> <span class="nf">cancel_job_by_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SSHResponse</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;scancel </span><span class="si">{</span><span class="n">job_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="UFRC.cancel_jobs_by_lookup"><a class="viewcode-back" href="../../api/ufrc.html#ufrc.main.UFRC.cancel_jobs_by_lookup">[docs]</a>    <span class="k">def</span> <span class="nf">cancel_jobs_by_lookup</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">group_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">user_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">job_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SSHResponse</span><span class="p">:</span>
+        <span class="n">job_status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">job_status</span><span class="p">(</span>
+            <span class="n">group_name</span><span class="o">=</span><span class="n">group_name</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="n">user_id</span><span class="p">,</span> <span class="n">job_name</span><span class="o">=</span><span class="n">job_name</span>
+        <span class="p">)</span>
+        <span class="n">full_response</span> <span class="o">=</span> <span class="n">SSHResponse</span><span class="p">(</span><span class="n">stdout</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">job</span> <span class="ow">in</span> <span class="n">job_status</span><span class="o">.</span><span class="n">jobs</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Cancelling job </span><span class="si">{</span><span class="n">job</span><span class="o">.</span><span class="n">job_id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">job</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> running in group </span><span class="si">{</span><span class="n">group_name</span><span class="si">}</span><span class="s2"> under user </span><span class="si">{</span><span class="n">user_id</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cancel_job_by_id</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">job_id</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+            <span class="n">full_response</span> <span class="o">+=</span> <span class="n">response</span>
+        <span class="k">return</span> <span class="n">full_response</span></div></div>
 
     <span class="c1"># TODO: run python code directly</span>
 </pre></div>

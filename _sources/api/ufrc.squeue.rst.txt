@@ -1,0 +1,19 @@
+ufrc.squeue package
+===================
+
+.. automodule:: ufrc.squeue
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+ufrc.squeue.model module
+------------------------
+
+.. automodule:: ufrc.squeue.model
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
