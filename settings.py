@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     username: str
     password: str
     uid: int
+    group_name: str
 
     class Config:
         env_file = ".env"
