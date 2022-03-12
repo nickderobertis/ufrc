@@ -11,5 +11,25 @@
       "render_relative_root_in_template": "{{cookiecutter.repo_name}}"
     }
   ],
-  "applied_templates": []
+  "applied_templates": [
+    {
+      "name": "copier-pypi-sphinx-flexlate",
+      "data": {
+        "package_name": "ufrc",
+        "package_directory": "ufrc",
+        "full_name": "Tools for UFRC",
+        "repo_name": "ufrc",
+        "repo_username": "nickderobertis",
+        "short_description": "Tools for UFRC",
+        "package_author": "Nick DeRobertis",
+        "author_email": "whoopnip@gmail.com",
+        "google_analytics_id": "",
+        "logo_url": "",
+        "install_packages": ""
+      },
+      "version": "02890f12e8acc7c80d3f201690981e103aacca23",
+      "add_mode": "local",
+      "root": ".."
+    }
+  ]
 }
