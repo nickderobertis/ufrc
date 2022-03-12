@@ -1,4 +1,3 @@
-
 [![](https://codecov.io/gh/nickderobertis/ufrc/branch/master/graph/badge.svg)](https://codecov.io/gh/nickderobertis/ufrc)
 
 #  ufrc

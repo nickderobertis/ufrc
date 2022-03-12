@@ -1,3 +1,3 @@
 """
-Tools for UFRC
+{{ short_description }}
 """
