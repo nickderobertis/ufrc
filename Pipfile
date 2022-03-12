@@ -20,7 +20,7 @@ pytest = "*"
 pytest-cov = "*"
 mypy = "*"
 pypandoc = "*"
-cruft = "*"
+flexlate = "*"
 paramiko = "*"
 pydantic = {extras = ["dotenv"], version = "*"}
 types-paramiko = "*"

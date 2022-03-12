@@ -29,6 +29,12 @@ See the
 https://nickderobertis.github.io/ufrc/
 )
 
+## Development Status
+
+This project is currently in early-stage development. There may be
+breaking changes often. While the major version is 0, minor version
+upgrades will often have breaking changes.
+
 ## Author
 
 Created by Nick DeRobertis. MIT License.
