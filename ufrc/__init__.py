@@ -1,4 +1,4 @@
 """
-Tools for UFRC
+{{ short_description }}
 """
 from ufrc.main import UFRC
