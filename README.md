@@ -1,4 +1,3 @@
-
 [![](https://codecov.io/gh/nickderobertis/ufrc/branch/master/graph/badge.svg)](https://codecov.io/gh/nickderobertis/ufrc)
 
 #  ufrc
@@ -29,6 +28,12 @@ See the
 [documentation here.](
 https://nickderobertis.github.io/ufrc/
 )
+
+## Development Status
+
+This project is currently in early-stage development. There may be
+breaking changes often. While the major version is 0, minor version
+upgrades will often have breaking changes.
 
 ## Author
 
